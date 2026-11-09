@@ -1,0 +1,1004 @@
+﻿1. Implementation of symbol table.
+----------------------------------------------
+#include <stdio.h>
+#include <string.h>
+#define MAX 100
+struct Symbol {
+char name[20];
+char type[10];
+int size;
+int line;
+};
+struct Symbol table[MAX];
+int count = 0;
+// Insert a symbol
+void insert() {
+char name[20], type[10];
+int size, line;
+printf("Enter symbol name: ");
+scanf("%s", name);
+// Check if symbol already exists
+for (int i = 0; i < count; i++) {
+if (strcmp(name, table[i].name) == 0) {
+printf("Symbol already exists!\n");
+return;
+}
+}
+printf("Enter symbol type: ");
+scanf("%s", type);
+printf("Enter size: ");
+scanf("%d", &size);
+printf("Enter line number: ");
+scanf("%d", &line);
+strcpy(table[count].name, name);
+strcpy(table[count].type, type);
+table[count].size = size;
+table[count].line = line;
+count++;
+printf("Symbol inserted successfully.\n");
+}
+
+
+// Display all symbols
+void display() {
+if (count == 0) {
+printf("Symbol table is empty.\n");
+return;
+}
+printf("\n%-20s %-10s %-5s %-5s\n", "Name", "Type", "Size", "Line");
+printf("---------------------------------------------------\n");
+for (int i = 0; i < count; i++) {
+printf("%-20s %-10s %-5d %-5d\n", table[i].name, table[i].type, table[i].size,
+table[i].line);
+}
+}
+// Search for a symbol
+void search() {
+char name[20];
+printf("Enter symbol name to search: ");
+scanf("%s", name);
+for (int i = 0; i < count; i++) {
+if (strcmp(name, table[i].name) == 0) {
+printf("Symbol found at position %d\n", i + 1);
+printf("Name: %s, Type: %s, Size: %d, Line: %d\n",
+table[i].name, table[i].type, table[i].size, table[i].line);
+return;
+}
+}
+printf("Symbol not found.\n");
+}
+// Modify a symbol
+void modify() {
+char name[20];
+printf("Enter symbol name to modify: ");
+scanf("%s", name);
+for (int i = 0; i < count; i++) {
+if (strcmp(name, table[i].name) == 0) {
+printf("Enter new type: ");
+scanf("%s", table[i].type);
+printf("Enter new size: ");
+scanf("%d", &table[i].size);
+printf("Enter new line number: ");
+
+
+scanf("%d", &table[i].line);
+printf("Symbol updated successfully.\n");
+return;
+}
+}
+printf("Symbol not found.\n");
+}
+// Main menu
+int main() {
+int choice;
+while (1) {
+printf("\n----- Symbol Table Menu -----\n");
+printf("1. Insert\n");
+printf("2. Display\n");
+printf("3. Search\n");
+printf("4. Modify\n");
+printf("5. Exit\n");
+printf("Enter your choice: ");
+scanf("%d", &choice);
+switch (choice) {
+case 1: insert(); break;
+case 2: display(); break;
+case 3: search(); break;
+case 4: modify(); break;
+case 5: return 0;
+default: printf("Invalid choice!\n");
+}
+}
+return 0;
+}
+
+
+
+---------------------------------------------------------------
+2. Implementation of lexical analyzer using lex tool.
+%{
+#include <stdio.h>
+#include <string.h>
+%}
+
+
+%%
+
+
+"if" { printf("Keyword: %s\n", yytext); }
+"else" { printf("Keyword: %s\n", yytext); }
+"while" { printf("Keyword: %s\n", yytext); }
+"return" { printf("Keyword: %s\n", yytext); }
+
+
+[0-9]+ { printf("Number: %s\n", yytext); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf("Identifier: %s\n", yytext); }
+
+
+"=="|"!="|"<="|">="|"<"|">" { printf("Relational Operator: %s\n", yytext); }
+"+"|"-"|"*"|"/" { printf("Arithmetic Operator: %s\n", yytext); }
+
+
+"//".* { printf("Single Line Comment: %s\n", yytext); }
+
+
+[ \t\n]+ { /* Skip whitespace */ }
+
+
+. { printf("Unrecognized token: %s\n", yytext); }
+
+
+%%
+
+
+int main(int argc, char **argv)
+{
+yylex();
+return 0;
+}
+
+
+----------------------------------------------------------------------------
+3.b) Program to recognize a valid variable which starts with a letter followed by any number of
+letter or digits.
+%{
+#include <stdio.h>
+%}
+%%
+[a-zA-Z][a-zA-Z0-9]* { printf("Valid variable: %s\n", yytext); }
+[^ \t\n]+ { printf("Invalid variable: %s\n", yytext); }
+[ \t\n] ;
+%%
+int main()
+{
+printf("Enter variable names (Ctrl+D to stop):\n");
+yylex();
+return 0;
+}
+int yywrap() {
+return 1;
+}
+
+
+----------------------------------------------------------------
+c) Implementation of calculator using lex and yacc.
+%{
+#include<stdio.h>
+int flag=0;
+%}
+
+
+%token NUMBER
+%left '+' '-'
+%left '*' '/' '%'
+%left '(' ')'
+%%
+ArithmeticExpression: E{ printf("\nResult=%d\n",$$);return 0; };
+E:E'+'E {$1+$3;}
+|E'-'E {$1-$3;}
+|E'*'E {$1*$3;}
+|E'/'E {$1/$3;}
+|E'%'E {$1%$3;}
+|'('E')' {$2;}
+| NUMBER {$1;};
+%%
+void main()
+{
+printf("\nEnter any arithmetic expression:\n");
+yyparse();
+if(flag==0)
+printf("\nEntered arithmetic expression is valid\n\n");
+}
+void yyerror()
+{
+printf("\nEntered arithmetic expression is invalid\n\n");
+flag=1;
+}
+
+
+----------------------------------------------------------------------
+
+Implement Any One Storage Allocation Strategy (Heap, Stack, or Static)
+Implementation of Stack-Based Storage Allocation Strategy
+#include <stdio.h>
+#include <string.h>
+#define SIZE 10
+typedef struct {
+char name[10];
+int value;
+} Var;
+Var stack[SIZE];
+int top = -1;
+// Function to push a variable onto the stack
+void push(char name[], int value) {
+if (top < SIZE - 1) {
+top++;
+strcpy(stack[top].name, name);
+stack[top].value = value;
+printf("Allocated %s = %d\n", name, value);
+} else {
+printf("Stack Overflow: Cannot allocate %s\n", name);
+}
+}
+// Function to pop a variable from the stack
+
+
+void pop() {
+if (top >= 0) {
+printf("Deallocated %s\n", stack[top].name);
+top--;
+} else {
+printf("Stack Underflow: No variable to deallocate\n");
+}
+}
+// Function to display current stack content
+void display() {
+printf("Stack:\n");
+for (int i = top; i >= 0; i--)
+printf(" %s = %d\n", stack[i].name, stack[i].value);
+}
+int main() {
+push("a", 10);
+push("b", 20);
+display();
+pop();
+display();
+return 0;
+}
+
+
+
+--------------------------------------------------------------------------------------
+write recursive descent parser for the grammar E->E+T E->T T->T*F T->F F->(E)/id.
+
+
+#include <stdio.h>
+#include <ctype.h>
+char *input;
+char lookahead;
+void error(const char *msg) {
+printf("Error: %s\n", msg);
+exit(1);
+}
+void match(char expected) {
+if (lookahead == expected) {
+lookahead = *++input;
+} else {
+error("Unexpected character");
+}
+}
+void E(); // E -> T E'
+void E_(); // E' -> + T E' | ε
+void T(); // T -> F T'
+void T_(); // T' -> * F T' | ε
+void F(); // F -> ( E ) | id
+
+
+void E() {
+T();
+E_();
+}
+void E_() {
+if (lookahead == '+') {
+match('+');
+T();
+E_();
+}
+// else epsilon (do nothing)
+}
+void T() {
+F();
+T_();
+}
+void T_() {
+if (lookahead == '*') {
+match('*');
+F();
+T_();
+}
+// else epsilon
+}
+void F() {
+if (lookahead == '(') {
+
+
+match('(');
+E();
+match(')');
+} else if (isalpha(lookahead)) {
+match(lookahead); // id is a single letter like 'a', 'x', etc.
+} else {
+error("Expected identifier or parenthesis");
+}
+}
+int main() {
+char buffer[100];
+printf("Enter an arithmetic expression (e.g., a+b*c): ");
+scanf("%s", buffer);
+input = buffer;
+lookahead = *input;
+E();
+if (lookahead == '\0') {
+printf("Parsing successful: The input is valid.\n");
+} else {
+error("Extra characters after valid input");
+}
+return 0;
+}
+
+
+---------------------------------------------------------------------------
+
+Write recursive descent parser for the grammar S->(L) S->a L->L,S L->S.
+
+
+Code:
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+const char *input;
+int pos = 0;
+// Function to get the current character
+char current_char() {
+return input[pos];
+}
+// Match current character with expected
+bool match(char expected) {
+if (current_char() == expected) {
+pos++;
+return true;
+}
+return false;
+}
+// Grammar functions
+bool S();
+
+
+bool L();
+bool L_dash();
+// S → (L) | a
+bool S() {
+if (match('a')) {
+return true;
+} else if (match('(')) {
+if (L()) {
+if (match(')')) {
+return true;
+}
+}
+}
+return false;
+}
+// L → S L'
+bool L() {
+if (S()) {
+return L_dash();
+}
+return false;
+}
+// L' → , S L' | ε
+bool L_dash() {
+if (match(',')) {
+if (S()) {
+
+
+return L_dash();
+} else {
+return false;
+}
+}
+return true; // ε
+}
+// Main parser function
+bool parse(const char *str) {
+input = str;
+pos = 0;
+if (S() && input[pos] == '\0') {
+return true;
+} else {
+return false;
+}
+}
+// Main function with dynamic input
+int main() {
+char buffer[100];
+printf("Enter input string: ");
+scanf("%s", buffer); // You can also use fgets() for full-line input
+
+
+if (parse(buffer)) {
+printf("The input \"%s\" is Valid.\n", buffer);
+} else {
+
+
+printf("The input \"%s\" is Invalid.\n", buffer);
+}
+return 0;
+}
+
+------------------------------------------------------------
+
+12. Write a C program to calculate first function for the grammar E->E+T E->T T->T*F T->F F-
+>(E)/id
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#define MAX 10
+char *prods[3][3] = {
+{"E", "E+T", "T"},
+{"T", "T*F", "F"},
+{"F", "(E)", "id"}
+};
+char firstE[MAX][MAX], firstT[MAX][MAX], firstF[MAX][MAX];
+int countE = 0, countT = 0, countF = 0;
+bool exists(char arr[MAX][MAX], int count, char *sym) {
+for (int i = 0; i < count; i++)
+if (!strcmp(arr[i], sym)) return true;
+return false;
+}
+
+
+void addFirst(char target[MAX][MAX], int *count, char source[MAX][MAX], int scount) {
+for (int i = 0; i < scount; i++)
+if (!exists(target, *count, source[i]))
+strcpy(target[(*count)++], source[i]);
+}
+void computeFirstF() {
+for (int i = 1; i < 3; i++) {
+char *p = prods[2][i];
+if (p[0] == '(' && !exists(firstF, countF, "(")) strcpy(firstF[countF++], "(");
+else if (!strcmp(p, "id") && !exists(firstF, countF, "id")) strcpy(firstF[countF++], "id");
+}
+}
+void computeFirstT() {
+computeFirstF();
+for (int i = 1; i < 3; i++)
+addFirst(firstT, &countT, firstF, countF);
+}
+void computeFirstE() {
+computeFirstT();
+for (int i = 1; i < 3; i++)
+addFirst(firstE, &countE, firstT, countT);
+}
+
+
+void display(char *nt, char arr[MAX][MAX], int count) {
+printf("FIRST(%s) = { ", nt);
+for (int i = 0; i < count; i++)
+
+
+printf("%s%s", arr[i], i < count - 1 ? ", " : " ");
+printf("}\n");
+}
+int main() {
+computeFirstE();
+display("E", firstE, countE);
+display("T", firstT, countT);
+display("F", firstF, countF);
+return 0;
+}
+
+
+
+
+--------------------------------------------------------
+
+13. Write a YACC program to implement a top down parser for the given grammar.
+
+--
+Lex.l
+----
+
+%{
+#include "y.tab.h"
+%}
+%%
+[0-9]+ { yylval = atoi(yytext); return ID; }
+[+] { return PLUS; }
+[*] { return MUL; }
+[(] { return LP; }
+[)] { return RP; }
+[\n] { return 0; }
+
+
+. { return yytext[0]; }
+%%
+int yywrap() { return 1; }
+
+----
+Yacc.y
+--
+
+%{
+#include <stdio.h>
+%}
+%token ID PLUS MUL LP RP
+%%
+E : E PLUS T { printf("E -> E + T\n"); }
+| T { printf("E -> T\n"); }
+;
+T : T MUL F { printf("T -> T * F\n"); }
+| F { printf("T -> F\n"); }
+;
+F : LP E RP { printf("F -> (E)\n"); }
+| ID { printf("F -> id\n"); }
+;
+%%
+int main() {
+printf("Enter an expression:\n");
+yyparse();
+return 0;
+}
+int yyerror(const char *msg) {
+printf("Invalid Expression\n");
+
+
+return 0;
+}
+
+
+---------------------
+
+14. Write a YACC program to evaluate algebraic expression.
+Create calc. l
+
+
+%{
+#include "y.tab.h"
+#include <stdlib.h>
+%}
+%%
+[0-9]+ { yylval = atoi(yytext); return NUMBER; }
+
+
+[ \t] ; // skip spaces
+\n return '\n';
+. return yytext[0]; // return symbols like +, -, *, /, (, )
+%%
+
+
+
+
+----Create calc.y------------
+
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+%token NUMBER
+%%
+start:
+expr '\n' { printf("Result = %d\n", $1); }
+;
+expr:
+expr '+' expr { $$ = $1 + $3; }
+| expr '-' expr { $$ = $1 - $3; }
+| expr '*' expr { $$ = $1 * $3; }
+| expr '/' expr {
+if ($3 == 0) {
+printf("Error: Division by zero\n");
+exit(1);
+}
+$$ = $1 / $3;
+}
+| '(' expr ')' { $$ = $2; }
+
+
+| NUMBER
+;
+%%
+int main() {
+printf("Enter expression: ");
+yyparse();
+return 0;
+}
+int yyerror(const char *s) {
+printf("Error: %s\n", s);
+return 0;
+}
+
+
+
+======================================
+Lex Program to Identify Reserved Keywords and Identifiers 
+
+
+reserved.l
+
+
+%{
+#include<stdio.h>
+%}
+
+
+%%
+"int"|"float"|"char"|"double"|"if"|"else"|"while"|"for"|"return"|"void" {
+    printf("%s is a Keyword\n",yytext);
+}
+
+
+[a-zA-Z_][a-zA-Z0-9_]* {
+    printf("%s is an Identifier\n",yytext);
+}
+
+
+[0-9]+ {
+    printf("%s is a Number\n",yytext);
+}
+
+
+[ \t\n]+ ;
+. ;
+%%
+
+
+int main()
+{
+    printf("Enter a string:\n");
+    yylex();
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
+
+
+
+
+--------
+INPUT
+-----
+
+int main()
+{
+    int a;
+    float marks;
+    return 0;
+}
+
+
+
+
+
+============================
+
+Lex Program to Validate Vowels and Consonants 
+
+
+%{
+#include<stdio.h>
+%}
+
+
+%%
+"int"|"float"|"char"|"double"|"if"|"else"|"while"|"for"|"return"|"void" {
+    printf("%s is a Keyword\n",yytext);
+}
+
+
+[a-zA-Z_][a-zA-Z0-9_]* {
+    printf("%s is an Identifier\n",yytext);
+}
+
+
+[0-9]+ {
+    printf("%s is a Number\n",yytext);
+}
+
+
+[ \t\n]+ ;
+. ;
+%%
+
+
+int main()
+{
+    printf("Enter a string:\n");
+    yylex();
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
+
+
+------------------------------------------------------
+
+LEX PROGRAM TO VALIDATE NOUN AND VERB
+%{
+#include<stdio.h>
+%}
+
+
+%%
+"boy"|"girl"|"book"|"school"|"apple" {
+    printf("%s is a Noun\n", yytext);
+}
+
+
+"run"|"eat"|"play"|"write"|"read" {
+    printf("%s is a Verb\n", yytext);
+}
+
+
+[a-zA-Z]+ {
+    printf("%s is an Unknown Word\n", yytext);
+}
+
+
+[ \t\n]+ ;
+. ;
+%%
+
+
+int main()
+{
+    printf("Enter a word: ");
+    yylex();
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
+
+
+
+=------------------------------------------------------------------
+
+
+C Program to Generate Three Address Code (TAC) 
+
+
+#include<stdio.h>
+#include<string.h>
+
+
+int main()
+{
+    char exp[50], temp[2];
+    int i, j = 1;
+
+
+    printf("Enter expression: ");
+    scanf("%s", exp);
+
+
+    for(i = 0; exp[i] != '\0'; i++)
+    {
+        if(exp[i] == '*' || exp[i] == '/' ||
+           exp[i] == '+' || exp[i] == '-')
+        {
+            printf("t%d = %c %c %c\n", j,
+                   exp[i-1], exp[i], exp[i+1]);
+
+
+            exp[i-1] = 't';
+            exp[i] = j + '0';
+            exp[i+1] = ' ';
+            j++;
+        }
+    }
+
+
+    return 0;
+}
+
+
+Sample Input:
+Enter expression: a+b*c
+Sample Output (illustrative intended TAC):
+t1 = b * c
+t2 = a + t1
+
+
+
+
+-----------------------------------------
+Lex Program to Count Number of Vowels and Consonants in a File 
+
+
+— create a file input.txt–
+—--put this in that file—
+Hello World
+Compiler Design
+
+
+
+
+%{
+#include<stdio.h>
+int v=0, c=0;
+%}
+
+
+%%
+[aeiouAEIOU]  { v++; }
+[a-zA-Z]      { c++; }
+.|\n          ;
+%%
+
+
+int main()
+{
+    FILE *fp;
+    fp=fopen("input.txt","r");
+
+
+    if(fp==NULL)
+    {
+        printf("File not found");
+        return 1;
+    }
+
+
+    yyin=fp;
+    yylex();
+
+
+    printf("Vowels = %d\n",v);
+    printf("Consonants = %d\n",c);
+
+
+    fclose(fp);
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
+
+
+
+
+
+
+==================================
+
+Lex to validate upper and lower
+
+
+%{
+#include<stdio.h>
+%}
+
+
+%%
+[a-z]  { printf("%c", yytext[0]-32); }
+[A-Z]  { printf("%c", yytext[0]+32); }
+.|\n   { printf("%s", yytext); }
+%%
+
+
+int main()
+{
+    printf("Enter a string:\n");
+    yylex();
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
+
+
+---------------------------------------------------
+
+8)Write a lex program to count the number of words and number of lines in a given program.
+
+
+%{
+int word_count = 0;
+int line_count = 0;
+%}
+%%
+[ \t]+ ; // Ignore spaces and tabs
+\n { line_count++; } // Count newlines
+[a-zA-Z0-9_]+ { word_count++; } // Count words (identifiers, numbers)
+. ; // Ignore all other characters
+%%
+int main(int argc, char **argv) {
+yylex(); // Run lexer
+printf("Total lines: %d\n", line_count);
+printf("Total words: %d\n", word_count);
+return 0;
+}
+int yywrap() {
+return 1;
+}
+
+
+
+
+===================================
+
+Lex Program to Implement Arithmetic Operations 
+
+
+
+
+%{
+#include<stdio.h>
+#include<stdlib.h>
+int a,b;
+%}
+
+
+%%
+[0-9]+[ \t]*[+][ \t]*[0-9]+ {
+    sscanf(yytext,"%d + %d",&a,&b);
+    printf("Addition = %d\n",a+b);
+}
+
+
+[0-9]+[ \t]*[-][ \t]*[0-9]+ {
+    sscanf(yytext,"%d - %d",&a,&b);
+    printf("Subtraction = %d\n",a-b);
+}
+
+
+[0-9]+[ \t]*[*][ \t]*[0-9]+ {
+    sscanf(yytext,"%d * %d",&a,&b);
+    printf("Multiplication = %d\n",a*b);
+}
+
+
+[0-9]+[ \t]*[/][ \t]*[0-9]+ {
+    sscanf(yytext,"%d / %d",&a,&b);
+    if(b!=0)
+        printf("Division = %d\n",a/b);
+    else
+        printf("Division by zero is not allowed\n");
+}
+
+
+[ \t\n]+ ;
+. { printf("Invalid expression\n"); }
+%%
+
+
+int main()
+{
+    printf("Enter arithmetic expression: ");
+    yylex();
+    return 0;
+}
+
+
+int yywrap()
+{
+    return 1;
+}
